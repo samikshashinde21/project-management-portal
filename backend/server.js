@@ -11,11 +11,16 @@ connectDB();
 const app = express();
 
 app.use(cors());
+
 app.use(express.json());
+
+const userRoutes = require("./routes/userRoutes");
 
 app.get("/", (req, res) => {
   res.send("API running...");
 });
+
+app.use("/api/users", userRoutes);
 
 const PORT = process.env.PORT || 5000;
 
