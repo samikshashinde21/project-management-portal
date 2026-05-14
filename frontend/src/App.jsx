@@ -12,6 +12,10 @@ import ClientDashboard from "./pages/ClientDashboard";
 import UserDashboard from "./pages/UserDashboard";
 import ClientProjects from "./pages/ClientProjects";
 import ProfilePage from "./pages/ProfilePage";
+import AdminProjects from "./pages/AdminProjects";
+import ClientManagement from "./pages/ClientManagement";
+import ReportsPage from "./pages/ReportsPage";
+import SettingsPage from "./pages/SettingsPage";
 
 import ProtectedRoute from "./routes/ProtectedRoute";
 import UserManagement from "./pages/UserManagement";
@@ -76,6 +80,50 @@ function App() {
               allowedRole="admin"
             >
               <UserManagement />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/clients"
+          element={
+            <ProtectedRoute
+              allowedRole="admin"
+            >
+              <ClientManagement />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/admin-projects"
+          element={
+            <ProtectedRoute
+              allowedRole="admin"
+            >
+              <AdminProjects />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/reports"
+          element={
+            <ProtectedRoute
+              allowedRole="admin"
+            >
+              <ReportsPage />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/settings"
+          element={
+            <ProtectedRoute
+              allowedRole="admin"
+            >
+              <SettingsPage />
             </ProtectedRoute>
           }
         />

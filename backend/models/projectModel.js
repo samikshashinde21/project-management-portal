@@ -23,6 +23,15 @@ const projectSchema = mongoose.Schema(
       ref: "User",
     },
 
+    assignedDate: {
+      type: Date,
+      default: Date.now,
+    },
+
+    deadline: {
+      type: Date,
+    },
+
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",

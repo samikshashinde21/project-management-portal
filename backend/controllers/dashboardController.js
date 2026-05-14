@@ -17,7 +17,19 @@ const getAdminDashboard = async (req, res) => {
       role: "client",
     });
 
+    const totalAdmins = await User.countDocuments({
+      role: "admin",
+    });
+
     const totalProjects = await Project.countDocuments();
+
+    const pendingProjects = await Project.countDocuments({
+      status: "pending",
+    });
+
+    const inProgressProjects = await Project.countDocuments({
+      status: "in-progress",
+    });
 
     const completedProjects = await Project.countDocuments({
       status: "completed",
@@ -30,7 +42,10 @@ const getAdminDashboard = async (req, res) => {
     res.json({
       totalUsers,
       totalClients,
+      totalAdmins,
       totalProjects,
+      pendingProjects,
+      inProgressProjects,
       completedProjects,
       recentProjects,
     });

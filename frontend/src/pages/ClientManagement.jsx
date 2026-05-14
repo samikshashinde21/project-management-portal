@@ -5,17 +5,18 @@ import DashboardLayout from "../layouts/DashboardLayout";
 import API from "../services/api";
 
 
-const emptyForm = {
+const emptyClientForm = {
   name: "",
   email: "",
   password: "",
-  role: "user",
+  role: "client",
 };
 
 
-function UserManagement() {
+function ClientManagement() {
 
-  const [users, setUsers] = useState([]);
+  const [clients, setClients] =
+    useState([]);
 
   const [loading, setLoading] =
     useState(true);
@@ -23,11 +24,11 @@ function UserManagement() {
   const [showForm, setShowForm] =
     useState(false);
 
-  const [editingUser, setEditingUser] =
+  const [editingClient, setEditingClient] =
     useState(null);
 
   const [formData, setFormData] =
-    useState(emptyForm);
+    useState(emptyClientForm);
 
   const [formError, setFormError] =
     useState("");
@@ -56,56 +57,49 @@ function UserManagement() {
   };
 
 
-  const fetchUsers = async () => {
+  const fetchClients = async () => {
 
     try {
-
       const { data } = await API.get(
         "/users",
         config
       );
 
-      setUsers(
-        data.filter((user) => user.role !== "client")
+      setClients(
+        data.filter((user) => user.role === "client")
       );
 
     } catch (error) {
-
       setFormError(
         error.response?.data?.message ||
-          "Unable to load users."
+          "Unable to load clients."
       );
-
     } finally {
-
       setLoading(false);
     }
   };
 
 
   useEffect(() => {
-    fetchUsers();
+    fetchClients();
   }, []);
 
 
-  const openAddForm = (role = "user") => {
-    setEditingUser(null);
-    setFormData({
-      ...emptyForm,
-      role,
-    });
+  const openAddForm = () => {
+    setEditingClient(null);
+    setFormData(emptyClientForm);
     setFormError("");
     setShowForm(true);
   };
 
 
-  const openEditForm = (user) => {
-    setEditingUser(user);
+  const openEditForm = (client) => {
+    setEditingClient(client);
     setFormData({
-      name: user.name,
-      email: user.email,
+      name: client.name,
+      email: client.email,
       password: "",
-      role: user.role,
+      role: client.role,
     });
     setFormError("");
     setShowForm(true);
@@ -128,16 +122,16 @@ function UserManagement() {
     if (
       !formData.name.trim() ||
       !formData.email.trim() ||
-      (!editingUser && !formData.password.trim())
+      (!editingClient && !formData.password.trim())
     ) {
       setFormError("Please fill all required fields.");
       return;
     }
 
     try {
-      if (editingUser) {
+      if (editingClient) {
         await API.put(
-          `/users/${editingUser._id}`,
+          `/users/${editingClient._id}`,
           {
             name: formData.name.trim(),
             email: formData.email.trim(),
@@ -149,8 +143,8 @@ function UserManagement() {
 
         showToast(
           formData.role === "client"
-            ? "Role updated. User moved to Clients."
-            : "User updated successfully."
+            ? "Client updated successfully."
+            : "Role updated. Client moved to Users."
         );
       } else {
         await API.post(
@@ -159,25 +153,21 @@ function UserManagement() {
             name: formData.name.trim(),
             email: formData.email.trim(),
             password: formData.password.trim(),
-            role: formData.role,
+            role: "client",
           },
           config
         );
 
-        showToast(
-          formData.role === "admin"
-            ? "Admin created successfully."
-            : "User created successfully."
-        );
+        showToast("Client added successfully.");
       }
 
       setShowForm(false);
-      await fetchUsers();
+      await fetchClients();
 
     } catch (error) {
       setFormError(
         error.response?.data?.message ||
-          "User could not be saved."
+          "Client could not be saved."
       );
     }
   };
@@ -191,8 +181,8 @@ function UserManagement() {
         config
       );
 
-      await fetchUsers();
-      showToast("User deleted successfully.");
+      await fetchClients();
+      showToast("Client deleted successfully.");
 
     } catch (error) {
       showToast(
@@ -207,14 +197,6 @@ function UserManagement() {
     return <h2>Loading...</h2>;
   }
 
-  const standardUsers = users.filter(
-    (user) => user.role === "user"
-  );
-
-  const adminUsers = users.filter(
-    (user) => user.role === "admin"
-  );
-
 
   return (
     <DashboardLayout>
@@ -226,57 +208,44 @@ function UserManagement() {
       )}
 
       <div className="admin-hero">
-
         <div>
           <span className="admin-eyebrow">
-            Account Control
+            Client Directory
           </span>
 
-          <h1>User Management</h1>
+          <h1>Client Management</h1>
 
           <p>
-            Create users, edit account details, and keep
-            admin accounts separated clearly.
+            Add, update, delete clients and manage roles
+            for project assignment access.
           </p>
         </div>
 
         <div className="admin-hero-action">
           <button
             className="primary-btn"
-            onClick={() => openAddForm("user")}
+            onClick={openAddForm}
           >
-            + Add User
-          </button>
-
-          <button
-            className="hero-secondary-btn"
-            onClick={() => openAddForm("admin")}
-          >
-            + Add Admin
+            + Add Client
           </button>
         </div>
-
       </div>
 
 
       <div className="admin-quick-stats">
         <div className="quick-stat">
-          <span>Shown Accounts</span>
-          <strong>{users.length}</strong>
+          <span>Total Clients</span>
+          <strong>{clients.length}</strong>
         </div>
 
         <div className="quick-stat">
-          <span>Standard Users</span>
-          <strong>
-            {standardUsers.length}
-          </strong>
+          <span>Project Access</span>
+          <strong>{clients.length}</strong>
         </div>
 
         <div className="quick-stat">
-          <span>Admins</span>
-          <strong>
-            {adminUsers.length}
-          </strong>
+          <span>Role</span>
+          <strong>Client</strong>
         </div>
       </div>
 
@@ -287,16 +256,12 @@ function UserManagement() {
             <div className="modal-header">
               <div>
                 <h2 className="modal-title">
-                  {editingUser
-                    ? "Edit User"
-                    : formData.role === "admin"
-                      ? "Add Admin"
-                      : "Add User"}
+                  {editingClient
+                    ? "Edit Client"
+                    : "Add Client"}
                 </h2>
                 <p className="modal-subtitle">
-                  {editingUser
-                    ? "Manage account details and role"
-                    : `This account will be created as ${formData.role}`}
+                  Manage client account details
                 </p>
               </div>
 
@@ -345,14 +310,14 @@ function UserManagement() {
                   value={formData.password}
                   onChange={inputChangeHandler}
                   placeholder={
-                    editingUser
+                    editingClient
                       ? "Leave blank to keep current password"
                       : "Enter password"
                   }
                 />
               </div>
 
-              {editingUser && (
+              {editingClient && (
                 <div className="form-group">
                   <label htmlFor="role">Role</label>
                   <select
@@ -361,8 +326,8 @@ function UserManagement() {
                     value={formData.role}
                     onChange={inputChangeHandler}
                   >
-                    <option value="user">User</option>
                     <option value="client">Client</option>
+                    <option value="user">User</option>
                     <option value="admin">Admin</option>
                   </select>
                 </div>
@@ -387,7 +352,7 @@ function UserManagement() {
                   type="submit"
                   className="primary-btn"
                 >
-                  Save User
+                  Save Client
                 </button>
               </div>
             </form>
@@ -396,12 +361,7 @@ function UserManagement() {
       )}
 
 
-      <div className="section-heading">
-        <h2>Users</h2>
-        <p>Registered accounts with standard user access.</p>
-      </div>
-
-      <div className="table-wrapper management-table">
+      <div className="table-wrapper">
         <table className="custom-table">
           <thead>
             <tr>
@@ -413,80 +373,30 @@ function UserManagement() {
           </thead>
 
           <tbody>
-            {standardUsers.map((user) => (
-              <tr key={user._id}>
-                <td>{user.name}</td>
-                <td>{user.email}</td>
+            {clients.map((client) => (
+              <tr key={client._id}>
+                <td>{client.name}</td>
+                <td>{client.email}</td>
                 <td>
                   <span className="role-pill">
-                    {user.role}
+                    {client.role}
                   </span>
                 </td>
                 <td>
                   <div className="table-actions">
                     <button
                       className="secondary-btn table-btn"
-                      onClick={() => openEditForm(user)}
-                    >
-                      Edit
-                    </button>
-
-                    <button
-                      className="delete-btn"
                       onClick={() =>
-                        deleteHandler(user._id)
+                        openEditForm(client)
                       }
                     >
-                      Delete
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-
-
-      <div className="section-heading">
-        <h2>Admins</h2>
-        <p>Accounts with administration permissions.</p>
-      </div>
-
-      <div className="table-wrapper management-table">
-        <table className="custom-table">
-          <thead>
-            <tr>
-              <th>Name</th>
-              <th>Email</th>
-              <th>Role</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-
-          <tbody>
-            {adminUsers.map((user) => (
-              <tr key={user._id}>
-                <td>{user.name}</td>
-                <td>{user.email}</td>
-                <td>
-                  <span className="role-pill admin-pill">
-                    {user.role}
-                  </span>
-                </td>
-                <td>
-                  <div className="table-actions">
-                    <button
-                      className="secondary-btn table-btn"
-                      onClick={() => openEditForm(user)}
-                    >
                       Edit
                     </button>
 
                     <button
                       className="delete-btn"
                       onClick={() =>
-                        deleteHandler(user._id)
+                        deleteHandler(client._id)
                       }
                     >
                       Delete
@@ -503,4 +413,4 @@ function UserManagement() {
   );
 }
 
-export default UserManagement;
+export default ClientManagement;

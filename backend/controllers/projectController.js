@@ -1,4 +1,5 @@
 const Project = require("../models/projectModel");
+const Settings = require("../models/settingsModel");
 
 
 // @desc Create project
@@ -7,12 +8,29 @@ const Project = require("../models/projectModel");
 
 const createProject = async (req, res) => {
   try {
-    const { title, description, assignedClient } = req.body;
+    const {
+      title,
+      description,
+      assignedClient,
+      assignedDate,
+      deadline,
+      status,
+    } = req.body;
+
+    const settings = await Settings.findOne({
+      key: "system",
+    });
 
     const project = await Project.create({
       title,
       description,
       assignedClient,
+      assignedDate,
+      deadline,
+      status:
+        status ||
+        settings?.defaultProjectStatus ||
+        "pending",
       createdBy: req.user._id,
     });
 
@@ -60,11 +78,11 @@ const getProjects = async (req, res) => {
 };
 
 
-// @desc Update project status
+// @desc Update project
 // @route PUT /api/projects/:id
 // @access Admin
 
-const updateProjectStatus = async (req, res) => {
+const updateProject = async (req, res) => {
   try {
 
     const project = await Project.findById(req.params.id);
@@ -75,11 +93,30 @@ const updateProjectStatus = async (req, res) => {
       });
     }
 
+    project.title = req.body.title || project.title;
+
+    project.description =
+      req.body.description || project.description;
+
+    project.assignedClient =
+      req.body.assignedClient || project.assignedClient;
+
+    project.assignedDate =
+      req.body.assignedDate || project.assignedDate;
+
+    project.deadline =
+      req.body.deadline || project.deadline;
+
     project.status = req.body.status || project.status;
 
     const updatedProject = await project.save();
 
-    res.json(updatedProject);
+    const populatedProject = await updatedProject.populate(
+      "assignedClient",
+      "name email role"
+    );
+
+    res.json(populatedProject);
 
   } catch (error) {
     res.status(500).json({
@@ -120,6 +157,6 @@ const deleteProject = async (req, res) => {
 module.exports = {
   createProject,
   getProjects,
-  updateProjectStatus,
+  updateProject,
   deleteProject,
 };

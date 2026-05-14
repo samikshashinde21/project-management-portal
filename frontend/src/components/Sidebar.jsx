@@ -48,15 +48,45 @@ function Sidebar() {
 
               <NavLink
                 to="/users"
-                className="sidebar-link"
+                className={({ isActive }) =>
+                  isActive
+                    ? "sidebar-link active-link"
+                    : "sidebar-link"
+                }
               >
                 Users
+              </NavLink>
+
+              <NavLink
+                to="/clients"
+                className={({ isActive }) =>
+                  isActive
+                    ? "sidebar-link active-link"
+                    : "sidebar-link"
+                }
+              >
+                Clients
+              </NavLink>
+
+              <NavLink
+                to="/admin-projects"
+                className={({ isActive }) =>
+                  isActive
+                    ? "sidebar-link active-link"
+                    : "sidebar-link"
+                }
+              >
+                Projects
               </NavLink>
 
 
               <NavLink
                 to="/reports"
-                className="sidebar-link"
+                className={({ isActive }) =>
+                  isActive
+                    ? "sidebar-link active-link"
+                    : "sidebar-link"
+                }
               >
                 Reports
               </NavLink>
@@ -139,12 +169,21 @@ function Sidebar() {
 
   <div className="dropdown-menu-custom">
 
-    <NavLink
-      to="/profile"
-      className="dropdown-link"
-    >
-      Profile
-    </NavLink>
+    {userInfo?.role === "admin" ? (
+      <NavLink
+        to="/settings"
+        className="dropdown-link"
+      >
+        Settings
+      </NavLink>
+    ) : (
+      <NavLink
+        to="/profile"
+        className="dropdown-link"
+      >
+        Profile
+      </NavLink>
+    )}
 
 
     <button

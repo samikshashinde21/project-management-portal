@@ -9,6 +9,8 @@ const {
   getUserProfile,
   updateUserProfile,
   getUsers,
+  createUserByAdmin,
+  updateUserByAdmin,
   updateUserRole,
   deleteUser,
 } = require("../controllers/userController");
@@ -22,6 +24,10 @@ router.get("/profile", protect, getUserProfile);
 router.put("/profile", protect, updateUserProfile);
 
 router.get("/", protect, admin, getUsers);
+
+router.post("/admin", protect, admin, createUserByAdmin);
+
+router.put("/:id", protect, admin, updateUserByAdmin);
 
 router.put("/:id/role", protect, admin, updateUserRole);
 

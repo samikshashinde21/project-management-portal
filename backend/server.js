@@ -12,6 +12,8 @@ const dashboardRoutes = require("./routes/dashboardRoutes");
 
 const reportRoutes = require("./routes/reportRoutes");
 
+const settingsRoutes = require("./routes/settingsRoutes");
+
 dotenv.config();
 
 connectDB();
@@ -35,6 +37,8 @@ app.use("/api/projects", projectRoutes);
 app.use("/api/dashboard", dashboardRoutes);
 
 app.use("/api/reports", reportRoutes);
+
+app.use("/api/settings", settingsRoutes);
 
 const PORT = process.env.PORT || 5000;
 

@@ -8,15 +8,40 @@ const Project = require("../models/projectModel");
 const getProjectReports = async (req, res) => {
   try {
 
-    const { startDate, endDate } = req.query;
+    const {
+      startDate,
+      endDate,
+      filterBy = "project-period",
+    } = req.query;
 
     let filter = {};
 
     if (startDate && endDate) {
-      filter.createdAt = {
-        $gte: new Date(startDate),
-        $lte: new Date(endDate),
-      };
+      const start = new Date(startDate);
+      start.setHours(0, 0, 0, 0);
+
+      const end = new Date(endDate);
+      end.setHours(23, 59, 59, 999);
+
+      if (filterBy === "deadline") {
+        filter.deadline = {
+          $gte: start,
+          $lte: end,
+        };
+      } else if (filterBy === "assigned-date") {
+        filter.assignedDate = {
+          $gte: start,
+          $lte: end,
+        };
+      } else {
+        filter.assignedDate = {
+          $gte: start,
+        };
+
+        filter.deadline = {
+          $lte: end,
+        };
+      }
     }
 
     const projects = await Project.find(filter)

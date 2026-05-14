@@ -5,7 +5,7 @@ const router = express.Router();
 const {
   createProject,
   getProjects,
-  updateProjectStatus,
+  updateProject,
   deleteProject,
 } = require("../controllers/projectController");
 
@@ -19,7 +19,7 @@ router.post("/", protect, admin, createProject);
 
 router.get("/", protect, getProjects);
 
-router.put("/:id", protect, admin, updateProjectStatus);
+router.put("/:id", protect, admin, updateProject);
 
 router.delete("/:id", protect, admin, deleteProject);
 
