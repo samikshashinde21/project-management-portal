@@ -11,6 +11,8 @@ import AdminDashboard from "./pages/AdminDashboard";
 import ClientDashboard from "./pages/ClientDashboard";
 import UserDashboard from "./pages/UserDashboard";
 
+import ProtectedRoute from "./routes/ProtectedRoute";
+
 
 function App() {
 
@@ -29,19 +31,40 @@ function App() {
           element={<RegisterPage />}
         />
 
+
         <Route
           path="/admin-dashboard"
-          element={<AdminDashboard />}
+          element={
+            <ProtectedRoute
+              allowedRole="admin"
+            >
+              <AdminDashboard />
+            </ProtectedRoute>
+          }
         />
+
 
         <Route
           path="/client-dashboard"
-          element={<ClientDashboard />}
+          element={
+            <ProtectedRoute
+              allowedRole="client"
+            >
+              <ClientDashboard />
+            </ProtectedRoute>
+          }
         />
+
 
         <Route
           path="/user-dashboard"
-          element={<UserDashboard />}
+          element={
+            <ProtectedRoute
+              allowedRole="user"
+            >
+              <UserDashboard />
+            </ProtectedRoute>
+          }
         />
 
       </Routes>

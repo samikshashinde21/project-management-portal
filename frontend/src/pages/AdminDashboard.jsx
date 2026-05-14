@@ -1,6 +1,62 @@
+import { useEffect, useState } from "react";
+
 import DashboardLayout from "../layouts/DashboardLayout";
 
+import API from "../services/api";
+
+
 function AdminDashboard() {
+
+  const [dashboardData, setDashboardData] =
+    useState(null);
+
+  const [loading, setLoading] =
+    useState(true);
+
+
+  useEffect(() => {
+
+    const fetchDashboard = async () => {
+
+      try {
+
+        const userInfo = JSON.parse(
+          localStorage.getItem("userInfo")
+        );
+
+        const config = {
+          headers: {
+            Authorization:
+              `Bearer ${userInfo.token}`,
+          },
+        };
+
+        const { data } = await API.get(
+          "/dashboard/admin",
+          config
+        );
+
+        setDashboardData(data);
+
+      } catch (error) {
+
+        console.log(error);
+
+      } finally {
+
+        setLoading(false);
+      }
+    };
+
+    fetchDashboard();
+
+  }, []);
+
+
+  if (loading) {
+    return <h2>Loading...</h2>;
+  }
+
 
   return (
     <DashboardLayout>
@@ -23,50 +79,50 @@ function AdminDashboard() {
         <div className="stat-card">
 
           <div className="stat-title">
-            Projects
+            Total Users
           </div>
 
           <div className="stat-value">
-            24
+            {dashboardData.totalUsers}
           </div>
 
         </div>
 
+
         <div className="stat-card">
 
           <div className="stat-title">
-            Tasks
+            Total Clients
           </div>
 
           <div className="stat-value">
-            138
+            {dashboardData.totalClients}
           </div>
 
         </div>
 
+
         <div className="stat-card">
 
           <div className="stat-title">
-            Done
+            Total Projects
           </div>
 
           <div className="stat-value">
-            89
+            {dashboardData.totalProjects}
           </div>
 
         </div>
 
+
         <div className="stat-card">
 
           <div className="stat-title">
-            Overdue
+            Completed Projects
           </div>
 
-          <div
-            className="stat-value"
-            style={{ color: "#ef4444" }}
-          >
-            7
+          <div className="stat-value">
+            {dashboardData.completedProjects}
           </div>
 
         </div>
@@ -79,40 +135,28 @@ function AdminDashboard() {
         <div className="panel">
 
           <div className="panel-title">
-            Recent Tasks
+            Recent Projects
           </div>
 
-          <div className="task-item">
-            <span>Design UI</span>
+          {dashboardData.recentProjects.map(
+            (project) => (
 
-            <span className="task-tag">
-              Design
-            </span>
-          </div>
+              <div
+                className="task-item"
+                key={project._id}
+              >
 
-          <div className="task-item">
-            <span>API rate limiting</span>
+                <span>
+                  {project.title}
+                </span>
 
-            <span className="task-tag">
-              Backend
-            </span>
-          </div>
+                <span className="task-tag">
+                  {project.status}
+                </span>
 
-          <div className="task-item">
-            <span>Release notes</span>
-
-            <span className="task-tag">
-              Docs
-            </span>
-          </div>
-
-          <div className="task-item">
-            <span>Mobile fixes</span>
-
-            <span className="task-tag">
-              Frontend
-            </span>
-          </div>
+              </div>
+            )
+          )}
 
         </div>
 
@@ -120,63 +164,24 @@ function AdminDashboard() {
         <div className="panel">
 
           <div className="panel-title">
-            Progress
+            Project Overview
           </div>
-
 
           <div className="progress-item">
 
             <div className="progress-header">
-              <span>Website</span>
+              <span>Completed</span>
 
-              <span>78%</span>
+              <span>
+                {dashboardData.completedProjects}
+              </span>
             </div>
 
             <div className="progress-bar-bg">
 
               <div
                 className="progress-bar-fill"
-                style={{ width: "78%" }}
-              ></div>
-
-            </div>
-
-          </div>
-
-
-          <div className="progress-item">
-
-            <div className="progress-header">
-              <span>Mobile App</span>
-
-              <span>51%</span>
-            </div>
-
-            <div className="progress-bar-bg">
-
-              <div
-                className="progress-bar-fill"
-                style={{ width: "51%" }}
-              ></div>
-
-            </div>
-
-          </div>
-
-
-          <div className="progress-item">
-
-            <div className="progress-header">
-              <span>API Platform</span>
-
-              <span>92%</span>
-            </div>
-
-            <div className="progress-bar-bg">
-
-              <div
-                className="progress-bar-fill"
-                style={{ width: "92%" }}
+                style={{ width: "70%" }}
               ></div>
 
             </div>

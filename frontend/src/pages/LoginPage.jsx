@@ -1,6 +1,9 @@
 import { useState } from "react";
 
-import { useNavigate, Link } from "react-router-dom";
+import {
+  useNavigate,
+  Link,
+} from "react-router-dom";
 
 import API from "../services/api";
 
@@ -9,9 +12,29 @@ function LoginPage() {
 
   const navigate = useNavigate();
 
+  const userInfo = JSON.parse(
+    localStorage.getItem("userInfo")
+  );
+
+
+  if (userInfo) {
+
+    if (userInfo.role === "admin") {
+      navigate("/admin-dashboard");
+
+    } else if (userInfo.role === "client") {
+      navigate("/client-dashboard");
+
+    } else {
+      navigate("/user-dashboard");
+    }
+  }
+
+
   const [email, setEmail] = useState("");
 
-  const [password, setPassword] = useState("");
+  const [password, setPassword] =
+    useState("");
 
   const [error, setError] = useState("");
 
@@ -56,62 +79,82 @@ function LoginPage() {
 
 
   return (
-    <div className="container mt-5">
+    <div className="auth-page">
 
-      <h2>Login</h2>
+      <div className="auth-card">
 
-      {error && (
-        <p className="text-danger">
-          {error}
-        </p>
-      )}
+      <h1 className="auth-logo">
+  Project Management Portal
+</h1>
 
-      <form onSubmit={submitHandler}>
 
-        <div className="mb-3">
-
-          <label>Email</label>
-
-          <input
-            type="email"
-            className="form-control"
-            value={email}
-            onChange={(e) =>
-              setEmail(e.target.value)
-            }
-          />
-        </div>
-
-        <div className="mb-3">
-
-          <label>Password</label>
-
-          <input
-            type="password"
-            className="form-control"
-            value={password}
-            onChange={(e) =>
-              setPassword(e.target.value)
-            }
-          />
-        </div>
-
-        <button
-          type="submit"
-          className="btn btn-primary"
-        >
+        <h2 className="auth-title">
           Login
-        </button>
+        </h2>
 
-      </form>
 
-      <p className="mt-3">
-        New user?{" "}
+        {error && (
+          <p className="auth-error">
+            {error}
+          </p>
+        )}
 
-        <Link to="/register">
-          Register
-        </Link>
-      </p>
+
+        <form onSubmit={submitHandler}>
+
+          <div className="auth-group">
+
+            <label>Email</label>
+
+            <input
+              type="email"
+              placeholder="Enter email"
+              value={email}
+              onChange={(e) =>
+                setEmail(e.target.value)
+              }
+            />
+
+          </div>
+
+
+          <div className="auth-group">
+
+            <label>Password</label>
+
+            <input
+              type="password"
+              placeholder="Enter password"
+              value={password}
+              onChange={(e) =>
+                setPassword(e.target.value)
+              }
+            />
+
+          </div>
+
+
+          <button
+            type="submit"
+            className="auth-btn"
+          >
+            Login
+          </button>
+
+        </form>
+
+
+        <p className="auth-switch">
+
+          Don’t have an account?{" "}
+
+          <Link to="/register">
+            Register
+          </Link>
+
+        </p>
+
+      </div>
 
     </div>
   );

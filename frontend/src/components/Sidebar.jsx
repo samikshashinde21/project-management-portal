@@ -1,6 +1,21 @@
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 
 function Sidebar() {
+
+  const navigate = useNavigate();
+
+  const userInfo = JSON.parse(
+    localStorage.getItem("userInfo")
+  );
+
+
+  const logoutHandler = () => {
+
+    localStorage.removeItem("userInfo");
+
+    navigate("/");
+  };
+
 
   return (
     <div className="sidebar">
@@ -11,32 +26,94 @@ function Sidebar() {
           FlowDesk
         </div>
 
+
         <div className="sidebar-menu">
 
-          <NavLink
-            to="/admin-dashboard"
-            className={({ isActive }) =>
-              isActive
-                ? "sidebar-link active-link"
-                : "sidebar-link"
-            }
-          >
-            Dashboard
-          </NavLink>
+          {/* ADMIN LINKS */}
 
-          <NavLink
-            to="/users"
-            className="sidebar-link"
-          >
-            Users
-          </NavLink>
+          {userInfo?.role === "admin" && (
+            <>
 
-          <NavLink
-            to="/reports"
-            className="sidebar-link"
-          >
-            Reports
-          </NavLink>
+              <NavLink
+                to="/admin-dashboard"
+                className={({ isActive }) =>
+                  isActive
+                    ? "sidebar-link active-link"
+                    : "sidebar-link"
+                }
+              >
+                Dashboard
+              </NavLink>
+
+
+              <NavLink
+                to="/users"
+                className="sidebar-link"
+              >
+                Users
+              </NavLink>
+
+
+              <NavLink
+                to="/reports"
+                className="sidebar-link"
+              >
+                Reports
+              </NavLink>
+
+            </>
+          )}
+
+
+          {/* CLIENT LINKS */}
+
+          {userInfo?.role === "client" && (
+            <>
+
+              <NavLink
+                to="/client-dashboard"
+                className={({ isActive }) =>
+                  isActive
+                    ? "sidebar-link active-link"
+                    : "sidebar-link"
+                }
+              >
+                Dashboard
+              </NavLink>
+
+
+              <NavLink
+                to="/client-projects"
+                className="sidebar-link"
+              >
+                Projects
+              </NavLink>
+
+            </>
+          )}
+
+
+          {/* USER LINKS */}
+
+          {userInfo?.role === "user" && (
+            <>
+
+              <NavLink
+                to="/user-dashboard"
+                className={({ isActive }) =>
+                  isActive
+                    ? "sidebar-link active-link"
+                    : "sidebar-link"
+                }
+              >
+                Dashboard
+              </NavLink>
+
+            </>
+          )}
+
+
+          {/* COMMON */}
 
           <NavLink
             to="/profile"
@@ -45,18 +122,31 @@ function Sidebar() {
             Profile
           </NavLink>
 
+
+          <button
+            className="logout-btn"
+            onClick={logoutHandler}
+          >
+            Logout
+          </button>
+
         </div>
 
       </div>
 
+
       <div className="user-box">
 
         <div className="user-avatar">
-          S
+
+          {userInfo?.name?.charAt(0)}
+
         </div>
 
         <div className="user-name">
-          Samiksha
+
+          {userInfo?.name}
+
         </div>
 
       </div>
