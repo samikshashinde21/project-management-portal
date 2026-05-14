@@ -4,6 +4,8 @@ import DashboardLayout from "../layouts/DashboardLayout";
 
 import API from "../services/api";
 
+import { useAuth } from "../context/AuthContext";
+
 
 function ReportsPage() {
 
@@ -25,9 +27,7 @@ function ReportsPage() {
   const [error, setError] =
     useState("");
 
-  const userInfo = JSON.parse(
-    localStorage.getItem("userInfo")
-  );
+  const { userInfo } = useAuth();
 
   const config = {
     headers: {

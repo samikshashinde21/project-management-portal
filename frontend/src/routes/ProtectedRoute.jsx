@@ -1,13 +1,13 @@
 import { Navigate } from "react-router-dom";
 
+import { useAuth } from "../context/AuthContext";
+
 function ProtectedRoute({
   children,
   allowedRole,
 }) {
 
-  const userInfo = JSON.parse(
-    localStorage.getItem("userInfo")
-  );
+  const { userInfo } = useAuth();
 
   if (!userInfo) {
     return <Navigate to="/" />;

@@ -1,17 +1,17 @@
 import { NavLink, useNavigate } from "react-router-dom";
 
+import { useAuth } from "../context/AuthContext";
+
 function Sidebar() {
 
   const navigate = useNavigate();
 
-  const userInfo = JSON.parse(
-    localStorage.getItem("userInfo")
-  );
+  const { userInfo, logout } = useAuth();
 
 
   const logoutHandler = () => {
 
-    localStorage.removeItem("userInfo");
+    logout();
 
     navigate("/");
   };

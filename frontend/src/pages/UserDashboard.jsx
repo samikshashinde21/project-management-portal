@@ -1,11 +1,11 @@
 import DashboardLayout from "../layouts/DashboardLayout";
 
+import { useAuth } from "../context/AuthContext";
+
 
 function UserDashboard() {
 
-  const userInfo = JSON.parse(
-    localStorage.getItem("userInfo")
-  );
+  const { userInfo } = useAuth();
 
   const profileItems = [
     userInfo?.name,

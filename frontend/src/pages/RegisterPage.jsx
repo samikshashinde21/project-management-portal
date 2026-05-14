@@ -10,6 +10,8 @@ import {
 
 import API from "../services/api";
 
+import { useAuth } from "../context/AuthContext";
+
 const passwordRuleMessage =
   "Password must be more than 6 characters and include one uppercase letter and one symbol.";
 
@@ -22,6 +24,8 @@ const isValidPassword = (password) =>
 function RegisterPage() {
 
   const navigate = useNavigate();
+
+  const { login } = useAuth();
 
   const [name, setName] = useState("");
 
@@ -90,10 +94,7 @@ function RegisterPage() {
         }
       );
 
-      localStorage.setItem(
-        "userInfo",
-        JSON.stringify(data)
-      );
+      login(data);
 
       navigate("/user-dashboard");
 

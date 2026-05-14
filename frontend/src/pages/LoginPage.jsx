@@ -7,14 +7,14 @@ import {
 
 import API from "../services/api";
 
+import { useAuth } from "../context/AuthContext";
+
 
 function LoginPage() {
 
   const navigate = useNavigate();
 
-  const userInfo = JSON.parse(
-    localStorage.getItem("userInfo")
-  );
+  const { userInfo, login } = useAuth();
 
 useEffect(() => {
 
@@ -56,10 +56,7 @@ useEffect(() => {
         }
       );
 
-      localStorage.setItem(
-        "userInfo",
-        JSON.stringify(data)
-      );
+      login(data);
 
       if (data.role === "admin") {
         navigate("/admin-dashboard");

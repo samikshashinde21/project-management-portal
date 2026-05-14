@@ -4,6 +4,8 @@ import DashboardLayout from "../layouts/DashboardLayout";
 
 import API from "../services/api";
 
+import { useAuth } from "../context/AuthContext";
+
 const passwordRuleMessage =
   "Password must be more than 6 characters and include one uppercase letter and one symbol.";
 
@@ -46,9 +48,7 @@ function UserManagement() {
   const [pendingDeleteUser, setPendingDeleteUser] =
     useState(null);
 
-  const userInfo = JSON.parse(
-    localStorage.getItem("userInfo")
-  );
+  const { userInfo } = useAuth();
 
   const config = {
     headers: {
