@@ -5,6 +5,8 @@ import {
 
 import { Navigate } from "react-router-dom";
 
+import PageLoader from "../components/PageLoader";
+
 import { useAuth } from "../context/AuthContext";
 
 function ProtectedRoute({
@@ -52,7 +54,7 @@ function ProtectedRoute({
   }
 
   if (checkingToken) {
-    return <h2>Loading...</h2>;
+    return <PageLoader />;
   }
 
   if (!tokenIsValid) {

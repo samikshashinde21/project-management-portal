@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 
 import DashboardLayout from "../layouts/DashboardLayout";
 
+import PageLoader from "../components/PageLoader";
+
 import API from "../services/api";
 
 import { useAuth } from "../context/AuthContext";
@@ -227,7 +229,7 @@ function UserManagement() {
 
 
   if (loading) {
-    return <h2>Loading...</h2>;
+    return <PageLoader />;
   }
 
   const standardUsers = users.filter(

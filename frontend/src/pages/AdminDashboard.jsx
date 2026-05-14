@@ -4,6 +4,8 @@ import { useNavigate } from "react-router-dom";
 
 import DashboardLayout from "../layouts/DashboardLayout";
 
+import PageLoader from "../components/PageLoader";
+
 import API from "../services/api";
 
 import { useAuth } from "../context/AuthContext";
@@ -65,7 +67,7 @@ function AdminDashboard() {
 
 
   if (loading) {
-    return <h2>Loading...</h2>;
+    return <PageLoader />;
   }
 
   if (error || !dashboardData) {
