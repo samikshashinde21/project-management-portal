@@ -16,7 +16,7 @@ Make sure you have the following installed:
 ## 1. Clone the Repository
 
 ```bash
-git clone <your-github-repository-url>
+git clone https://github.com/samikshashinde21/project-management-portal.git
 cd project-management-portal
 ```
 
@@ -91,15 +91,6 @@ Open the frontend URL in your browser:
 
 ```txt
 http://localhost:5173
-```
-
-## 5. Build Frontend for Production
-
-To create a production build of the frontend:
-
-```bash
-cd frontend
-npm run build
 ```
 
 ## Environment Variables
