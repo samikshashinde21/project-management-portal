@@ -60,7 +60,7 @@ function RegisterPage() {
       <div className="auth-card">
 
         <h1 className="auth-logo">
-          Project Management Portal
+          Project Management Website
         </h1>
 
 

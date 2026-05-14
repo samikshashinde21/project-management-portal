@@ -23,7 +23,7 @@ function Sidebar() {
       <div>
 
         <div className="logo">
-          FlowDesk
+          Project Management Website
         </div>
 
 
@@ -84,7 +84,11 @@ function Sidebar() {
 
               <NavLink
                 to="/client-projects"
-                className="sidebar-link"
+                className={({ isActive }) =>
+                  isActive
+                    ? "sidebar-link active-link"
+                    : "sidebar-link"
+                }
               >
                 Projects
               </NavLink>
@@ -113,43 +117,46 @@ function Sidebar() {
           )}
 
 
-          {/* COMMON */}
-
-          <NavLink
-            to="/profile"
-            className="sidebar-link"
-          >
-            Profile
-          </NavLink>
-
-
-          <button
-            className="logout-btn"
-            onClick={logoutHandler}
-          >
-            Logout
-          </button>
-
         </div>
 
       </div>
 
 
-      <div className="user-box">
+<div className="profile-dropdown">
 
-        <div className="user-avatar">
+  <div className="user-box">
 
-          {userInfo?.name?.charAt(0)}
+    <div className="user-avatar">
+      {userInfo?.name?.charAt(0)}
+    </div>
 
-        </div>
+    <div className="user-name">
+      {userInfo?.name}
+    </div>
 
-        <div className="user-name">
+  </div>
 
-          {userInfo?.name}
 
-        </div>
+  <div className="dropdown-menu-custom">
 
-      </div>
+    <NavLink
+      to="/profile"
+      className="dropdown-link"
+    >
+      Profile
+    </NavLink>
+
+
+    <button
+      className="dropdown-logout"
+      onClick={logoutHandler}
+    >
+      Logout
+    </button>
+
+  </div>
+
+</div>
 
     </div>
   );

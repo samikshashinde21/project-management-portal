@@ -62,7 +62,7 @@ const getProjects = async (req, res) => {
 
 // @desc Update project status
 // @route PUT /api/projects/:id
-// @access Client
+// @access Admin
 
 const updateProjectStatus = async (req, res) => {
   try {
@@ -72,14 +72,6 @@ const updateProjectStatus = async (req, res) => {
     if (!project) {
       return res.status(404).json({
         message: "Project not found",
-      });
-    }
-
-    if (
-      project.assignedClient.toString() !== req.user._id.toString()
-    ) {
-      return res.status(401).json({
-        message: "Not authorized",
       });
     }
 

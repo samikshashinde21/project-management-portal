@@ -19,7 +19,7 @@ router.post("/", protect, admin, createProject);
 
 router.get("/", protect, getProjects);
 
-router.put("/:id", protect, updateProjectStatus);
+router.put("/:id", protect, admin, updateProjectStatus);
 
 router.delete("/:id", protect, admin, deleteProject);
 

@@ -10,9 +10,11 @@ import RegisterPage from "./pages/RegisterPage";
 import AdminDashboard from "./pages/AdminDashboard";
 import ClientDashboard from "./pages/ClientDashboard";
 import UserDashboard from "./pages/UserDashboard";
+import ClientProjects from "./pages/ClientProjects";
+import ProfilePage from "./pages/ProfilePage";
 
 import ProtectedRoute from "./routes/ProtectedRoute";
-
+import UserManagement from "./pages/UserManagement";
 
 function App() {
 
@@ -63,6 +65,38 @@ function App() {
               allowedRole="user"
             >
               <UserDashboard />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/users"
+          element={
+            <ProtectedRoute
+              allowedRole="admin"
+            >
+              <UserManagement />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/client-projects"
+          element={
+            <ProtectedRoute
+              allowedRole="client"
+            >
+              <ClientProjects />
+            </ProtectedRoute>
+          }
+        />
+
+
+        <Route
+          path="/profile"
+          element={
+            <ProtectedRoute>
+              <ProfilePage />
             </ProtectedRoute>
           }
         />

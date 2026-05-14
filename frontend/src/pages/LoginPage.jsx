@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 import {
   useNavigate,
@@ -16,6 +16,7 @@ function LoginPage() {
     localStorage.getItem("userInfo")
   );
 
+useEffect(() => {
 
   if (userInfo) {
 
@@ -29,6 +30,8 @@ function LoginPage() {
       navigate("/user-dashboard");
     }
   }
+
+}, [userInfo, navigate]);
 
 
   const [email, setEmail] = useState("");
@@ -84,7 +87,7 @@ function LoginPage() {
       <div className="auth-card">
 
       <h1 className="auth-logo">
-  Project Management Portal
+  Project Management Website
 </h1>
 
 
