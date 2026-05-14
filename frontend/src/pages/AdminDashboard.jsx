@@ -17,6 +17,9 @@ function AdminDashboard() {
   const [loading, setLoading] =
     useState(true);
 
+  const [error, setError] =
+    useState("");
+
   const userInfo = JSON.parse(
     localStorage.getItem("userInfo")
   );
@@ -34,6 +37,7 @@ function AdminDashboard() {
     const fetchDashboard = async () => {
 
       try {
+        setError("");
 
         const { data } = await API.get(
           "/dashboard/admin",
@@ -44,7 +48,10 @@ function AdminDashboard() {
 
       } catch (error) {
 
-        console.log(error);
+        setError(
+          error.response?.data?.message ||
+            "Unable to load dashboard."
+        );
 
       } finally {
 
@@ -59,6 +66,16 @@ function AdminDashboard() {
 
   if (loading) {
     return <h2>Loading...</h2>;
+  }
+
+  if (error || !dashboardData) {
+    return (
+      <DashboardLayout>
+        <div className="form-error">
+          {error || "Dashboard data could not be loaded."}
+        </div>
+      </DashboardLayout>
+    );
   }
 
 

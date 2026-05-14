@@ -43,6 +43,9 @@ function UserManagement() {
   const [toast, setToast] =
     useState("");
 
+  const [pendingDeleteUser, setPendingDeleteUser] =
+    useState(null);
+
   const userInfo = JSON.parse(
     localStorage.getItem("userInfo")
   );
@@ -199,15 +202,19 @@ function UserManagement() {
   };
 
 
-  const deleteHandler = async (id) => {
+  const deleteHandler = async () => {
+    if (!pendingDeleteUser) {
+      return;
+    }
 
     try {
       await API.delete(
-        `/users/${id}`,
+        `/users/${pendingDeleteUser._id}`,
         config
       );
 
       await fetchUsers();
+      setPendingDeleteUser(null);
       showToast("User deleted successfully.");
 
     } catch (error) {
@@ -416,6 +423,54 @@ function UserManagement() {
         </div>
       )}
 
+      {pendingDeleteUser && (
+        <div className="modal-overlay">
+          <div className="project-modal delete-confirm-modal">
+            <div className="modal-header">
+              <div>
+                <h2 className="modal-title">
+                  Delete User?
+                </h2>
+                <p className="modal-subtitle">
+                  This will permanently remove{" "}
+                  <strong>{pendingDeleteUser.name}</strong>.
+                </p>
+              </div>
+
+              <button
+                className="modal-close-btn"
+                onClick={() => setPendingDeleteUser(null)}
+                type="button"
+              >
+                x
+              </button>
+            </div>
+
+            <div className="delete-confirm-body">
+              Are you sure you want to delete this account?
+            </div>
+
+            <div className="modal-actions">
+              <button
+                type="button"
+                className="secondary-btn"
+                onClick={() => setPendingDeleteUser(null)}
+              >
+                No
+              </button>
+
+              <button
+                type="button"
+                className="delete-btn confirm-delete-btn"
+                onClick={deleteHandler}
+              >
+                Yes
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
 
       <div className="section-heading">
         <h2>Users</h2>
@@ -455,7 +510,7 @@ function UserManagement() {
                     <button
                       className="delete-btn"
                       onClick={() =>
-                        deleteHandler(user._id)
+                        setPendingDeleteUser(user)
                       }
                     >
                       Delete
@@ -507,7 +562,7 @@ function UserManagement() {
                     <button
                       className="delete-btn"
                       onClick={() =>
-                        deleteHandler(user._id)
+                        setPendingDeleteUser(user)
                       }
                     >
                       Delete

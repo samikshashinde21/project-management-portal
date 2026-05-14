@@ -1150,6 +1150,22 @@ a {
   gap: 12px;
 }
 
+.delete-confirm-modal {
+  max-width: 420px;
+}
+
+.delete-confirm-body {
+  color: #4b5563;
+
+  line-height: 1.6;
+
+  margin-bottom: 22px;
+}
+
+.confirm-delete-btn {
+  padding: 11px 18px;
+}
+
 .user-summary-list div {
   background-color: #f8fafc;
 

@@ -13,6 +13,36 @@ const isValidPassword = (password) =>
   /[A-Z]/.test(password) &&
   /[^A-Za-z0-9]/.test(password);
 
+const allowedRoles = ["admin", "client", "user"];
+
+const getUserControllerError = (error) => {
+  if (error.name === "CastError") {
+    return {
+      status: 400,
+      message: "Invalid user id",
+    };
+  }
+
+  if (error.code === 11000) {
+    return {
+      status: 400,
+      message: "Email is already in use",
+    };
+  }
+
+  if (error.name === "ValidationError") {
+    return {
+      status: 400,
+      message: error.message,
+    };
+  }
+
+  return {
+    status: 500,
+    message: error.message,
+  };
+};
+
 
 // @desc Register user
 // @route POST /api/users
@@ -78,8 +108,10 @@ const registerUser = async (req, res) => {
       });
     }
   } catch (error) {
-    res.status(500).json({
-      message: error.message,
+    const responseError = getUserControllerError(error);
+
+    res.status(responseError.status).json({
+      message: responseError.message,
     });
   }
 };
@@ -92,6 +124,12 @@ const registerUser = async (req, res) => {
 const loginUser = async (req, res) => {
   try {
     const { email, password } = req.body;
+
+    if (!email || !password) {
+      return res.status(400).json({
+        message: "Email and password are required",
+      });
+    }
 
     const user = await User.findOne({ email });
 
@@ -113,14 +151,30 @@ const loginUser = async (req, res) => {
       });
     }
   } catch (error) {
-    res.status(500).json({
-      message: error.message,
+    const responseError = getUserControllerError(error);
+
+    res.status(responseError.status).json({
+      message: responseError.message,
     });
   }
 };
 
 const getUserProfile = async (req, res) => {
-  res.json(req.user);
+  try {
+    if (!req.user) {
+      return res.status(404).json({
+        message: "User not found",
+      });
+    }
+
+    res.json(req.user);
+  } catch (error) {
+    const responseError = getUserControllerError(error);
+
+    res.status(responseError.status).json({
+      message: responseError.message,
+    });
+  }
 };
 
 const updateUserProfile = async (req, res) => {
@@ -187,16 +241,26 @@ const updateUserProfile = async (req, res) => {
     }
 
   } catch (error) {
-    res.status(500).json({
-      message: error.message,
+    const responseError = getUserControllerError(error);
+
+    res.status(responseError.status).json({
+      message: responseError.message,
     });
   }
 };
 
 const getUsers = async (req, res) => {
-  const users = await User.find({}).select("-password");
+  try {
+    const users = await User.find({}).select("-password");
 
-  res.json(users);
+    res.json(users);
+  } catch (error) {
+    const responseError = getUserControllerError(error);
+
+    res.status(responseError.status).json({
+      message: responseError.message,
+    });
+  }
 };
 
 const createUserByAdmin = async (req, res) => {
@@ -218,6 +282,12 @@ const createUserByAdmin = async (req, res) => {
     if (!isValidPassword(password)) {
       return res.status(400).json({
         message: passwordRuleMessage,
+      });
+    }
+
+    if (role && !allowedRoles.includes(role)) {
+      return res.status(400).json({
+        message: "Invalid user role",
       });
     }
 
@@ -252,8 +322,10 @@ const createUserByAdmin = async (req, res) => {
     });
 
   } catch (error) {
-    res.status(500).json({
-      message: error.message,
+    const responseError = getUserControllerError(error);
+
+    res.status(responseError.status).json({
+      message: responseError.message,
     });
   }
 };
@@ -272,6 +344,12 @@ const updateUserByAdmin = async (req, res) => {
     user.name = req.body.name || user.name;
 
     user.email = req.body.email || user.email;
+
+    if (req.body.role && !allowedRoles.includes(req.body.role)) {
+      return res.status(400).json({
+        message: "Invalid user role",
+      });
+    }
 
     user.role = req.body.role || user.role;
 
@@ -301,46 +379,70 @@ const updateUserByAdmin = async (req, res) => {
     });
 
   } catch (error) {
-    res.status(500).json({
-      message: error.message,
+    const responseError = getUserControllerError(error);
+
+    res.status(responseError.status).json({
+      message: responseError.message,
     });
   }
 };
 
 const updateUserRole = async (req, res) => {
-  const user = await User.findById(req.params.id);
+  try {
+    if (req.body.role && !allowedRoles.includes(req.body.role)) {
+      return res.status(400).json({
+        message: "Invalid user role",
+      });
+    }
 
-  if (user) {
-    user.role = req.body.role || user.role;
+    const user = await User.findById(req.params.id);
 
-    const updatedUser = await user.save();
+    if (user) {
+      user.role = req.body.role || user.role;
 
-    res.json({
-      _id: updatedUser._id,
-      name: updatedUser.name,
-      email: updatedUser.email,
-      role: updatedUser.role,
-      profileImage: updatedUser.profileImage,
-    });
-  } else {
-    res.status(404).json({
-      message: "User not found",
+      const updatedUser = await user.save();
+
+      res.json({
+        _id: updatedUser._id,
+        name: updatedUser.name,
+        email: updatedUser.email,
+        role: updatedUser.role,
+        profileImage: updatedUser.profileImage,
+      });
+    } else {
+      res.status(404).json({
+        message: "User not found",
+      });
+    }
+  } catch (error) {
+    const responseError = getUserControllerError(error);
+
+    res.status(responseError.status).json({
+      message: responseError.message,
     });
   }
 };
 
 const deleteUser = async (req, res) => {
-  const user = await User.findById(req.params.id);
+  try {
+    const user = await User.findById(req.params.id);
 
-  if (user) {
-    await user.deleteOne();
+    if (user) {
+      await user.deleteOne();
 
-    res.json({
-      message: "User removed",
-    });
-  } else {
-    res.status(404).json({
-      message: "User not found",
+      res.json({
+        message: "User removed",
+      });
+    } else {
+      res.status(404).json({
+        message: "User not found",
+      });
+    }
+  } catch (error) {
+    const responseError = getUserControllerError(error);
+
+    res.status(responseError.status).json({
+      message: responseError.message,
     });
   }
 };

@@ -23,6 +23,18 @@ const getProjectReports = async (req, res) => {
       const end = new Date(endDate);
       end.setHours(23, 59, 59, 999);
 
+      if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) {
+        return res.status(400).json({
+          message: "Invalid report date range",
+        });
+      }
+
+      if (start > end) {
+        return res.status(400).json({
+          message: "Start date cannot be after end date",
+        });
+      }
+
       if (filterBy === "deadline") {
         filter.deadline = {
           $gte: start,

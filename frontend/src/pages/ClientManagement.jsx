@@ -44,6 +44,9 @@ function ClientManagement() {
   const [toast, setToast] =
     useState("");
 
+  const [pendingDeleteClient, setPendingDeleteClient] =
+    useState(null);
+
   const userInfo = JSON.parse(
     localStorage.getItem("userInfo")
   );
@@ -189,15 +192,19 @@ function ClientManagement() {
   };
 
 
-  const deleteHandler = async (id) => {
+  const deleteHandler = async () => {
+    if (!pendingDeleteClient) {
+      return;
+    }
 
     try {
       await API.delete(
-        `/users/${id}`,
+        `/users/${pendingDeleteClient._id}`,
         config
       );
 
       await fetchClients();
+      setPendingDeleteClient(null);
       showToast("Client deleted successfully.");
 
     } catch (error) {
@@ -381,6 +388,54 @@ function ClientManagement() {
         </div>
       )}
 
+      {pendingDeleteClient && (
+        <div className="modal-overlay">
+          <div className="project-modal delete-confirm-modal">
+            <div className="modal-header">
+              <div>
+                <h2 className="modal-title">
+                  Delete Client?
+                </h2>
+                <p className="modal-subtitle">
+                  This will permanently remove{" "}
+                  <strong>{pendingDeleteClient.name}</strong>.
+                </p>
+              </div>
+
+              <button
+                className="modal-close-btn"
+                onClick={() => setPendingDeleteClient(null)}
+                type="button"
+              >
+                x
+              </button>
+            </div>
+
+            <div className="delete-confirm-body">
+              Are you sure you want to delete this account?
+            </div>
+
+            <div className="modal-actions">
+              <button
+                type="button"
+                className="secondary-btn"
+                onClick={() => setPendingDeleteClient(null)}
+              >
+                No
+              </button>
+
+              <button
+                type="button"
+                className="delete-btn confirm-delete-btn"
+                onClick={deleteHandler}
+              >
+                Yes
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
 
       <div className="table-wrapper">
         <table className="custom-table">
@@ -417,7 +472,7 @@ function ClientManagement() {
                     <button
                       className="delete-btn"
                       onClick={() =>
-                        deleteHandler(client._id)
+                        setPendingDeleteClient(client)
                       }
                     >
                       Delete

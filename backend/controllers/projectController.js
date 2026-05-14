@@ -1,5 +1,28 @@
 const Project = require("../models/projectModel");
 
+const allowedStatuses = ["pending", "in-progress", "completed"];
+
+const getControllerError = (error, resourceName) => {
+  if (error.name === "CastError") {
+    return {
+      status: 400,
+      message: `Invalid ${resourceName} id`,
+    };
+  }
+
+  if (error.name === "ValidationError") {
+    return {
+      status: 400,
+      message: error.message,
+    };
+  }
+
+  return {
+    status: 500,
+    message: error.message,
+  };
+};
+
 
 // @desc Create project
 // @route POST /api/projects
@@ -16,6 +39,24 @@ const createProject = async (req, res) => {
       status,
     } = req.body;
 
+    if (
+      !title ||
+      !description ||
+      !assignedClient ||
+      !assignedDate ||
+      !deadline
+    ) {
+      return res.status(400).json({
+        message: "All project details are required",
+      });
+    }
+
+    if (status && !allowedStatuses.includes(status)) {
+      return res.status(400).json({
+        message: "Invalid project status",
+      });
+    }
+
     const project = await Project.create({
       title,
       description,
@@ -30,8 +71,10 @@ const createProject = async (req, res) => {
     res.status(201).json(project);
 
   } catch (error) {
-    res.status(500).json({
-      message: error.message,
+    const responseError = getControllerError(error, "project");
+
+    res.status(responseError.status).json({
+      message: responseError.message,
     });
   }
 };
@@ -64,8 +107,10 @@ const getProjects = async (req, res) => {
     res.json(projects);
 
   } catch (error) {
-    res.status(500).json({
-      message: error.message,
+    const responseError = getControllerError(error, "project");
+
+    res.status(responseError.status).json({
+      message: responseError.message,
     });
   }
 };
@@ -88,6 +133,15 @@ const updateProject = async (req, res) => {
 
     if (req.user.role === "client") {
       if (
+        req.body.status &&
+        !allowedStatuses.includes(req.body.status)
+      ) {
+        return res.status(400).json({
+          message: "Invalid project status",
+        });
+      }
+
+      if (
         project.assignedClient.toString() !==
         req.user._id.toString()
       ) {
@@ -98,6 +152,15 @@ const updateProject = async (req, res) => {
 
       project.status = req.body.status || project.status;
     } else if (req.user.role === "admin") {
+      if (
+        req.body.status &&
+        !allowedStatuses.includes(req.body.status)
+      ) {
+        return res.status(400).json({
+          message: "Invalid project status",
+        });
+      }
+
       project.title = req.body.title || project.title;
 
       project.description =
@@ -129,8 +192,10 @@ const updateProject = async (req, res) => {
     res.json(populatedProject);
 
   } catch (error) {
-    res.status(500).json({
-      message: error.message,
+    const responseError = getControllerError(error, "project");
+
+    res.status(responseError.status).json({
+      message: responseError.message,
     });
   }
 };
@@ -158,8 +223,10 @@ const deleteProject = async (req, res) => {
     });
 
   } catch (error) {
-    res.status(500).json({
-      message: error.message,
+    const responseError = getControllerError(error, "project");
+
+    res.status(responseError.status).json({
+      message: responseError.message,
     });
   }
 };
