@@ -4,6 +4,8 @@ import {
   useState,
 } from "react";
 
+import API from "../services/api";
+
 const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
@@ -36,6 +38,26 @@ export const AuthProvider = ({ children }) => {
     setUserInfo(userData);
   };
 
+  const validateToken = async () => {
+    if (!userInfo?.token) {
+      logout();
+      return false;
+    }
+
+    try {
+      await API.get("/users/profile", {
+        headers: {
+          Authorization: `Bearer ${userInfo.token}`,
+        },
+      });
+
+      return true;
+    } catch (error) {
+      logout();
+      return false;
+    }
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -43,6 +65,7 @@ export const AuthProvider = ({ children }) => {
         login,
         logout,
         updateUser,
+        validateToken,
       }}
     >
       {children}
