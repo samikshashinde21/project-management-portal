@@ -8,6 +8,10 @@ const userRoutes = require("./routes/userRoutes");
 
 const projectRoutes = require("./routes/projectRoutes");
 
+const dashboardRoutes = require("./routes/dashboardRoutes");
+
+const reportRoutes = require("./routes/reportRoutes");
+
 dotenv.config();
 
 connectDB();
@@ -27,6 +31,10 @@ app.get("/", (req, res) => {
 app.use("/api/users", userRoutes);
 
 app.use("/api/projects", projectRoutes);
+
+app.use("/api/dashboard", dashboardRoutes);
+
+app.use("/api/reports", reportRoutes);
 
 const PORT = process.env.PORT || 5000;
 
