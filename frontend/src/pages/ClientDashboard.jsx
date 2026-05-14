@@ -1,4 +1,6 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
+
+import { useLocation } from "react-router-dom";
 
 import DashboardLayout from "../layouts/DashboardLayout";
 
@@ -6,6 +8,8 @@ import API from "../services/api";
 
 
 function ClientDashboard() {
+
+  const location = useLocation();
 
   const [dashboardData, setDashboardData] =
     useState(null);
@@ -21,42 +25,41 @@ function ClientDashboard() {
   );
 
 
+  const fetchDashboard = useCallback(async () => {
+
+    try {
+
+      const config = {
+        headers: {
+          Authorization:
+            `Bearer ${userInfo?.token}`,
+        },
+      };
+
+      const { data } = await API.get(
+        "/dashboard/client",
+        config
+      );
+
+      setDashboardData(data);
+
+    } catch (error) {
+
+      setError(
+        error.response?.data?.message ||
+          "Unable to load dashboard."
+      );
+
+    } finally {
+
+      setLoading(false);
+    }
+  }, [userInfo?.token]);
+
+
   useEffect(() => {
-
-    const fetchDashboard = async () => {
-
-      try {
-
-        const config = {
-          headers: {
-            Authorization:
-              `Bearer ${userInfo?.token}`,
-          },
-        };
-
-        const { data } = await API.get(
-          "/dashboard/client",
-          config
-        );
-
-        setDashboardData(data);
-
-      } catch (error) {
-
-        setError(
-          error.response?.data?.message ||
-            "Unable to load dashboard."
-        );
-
-      } finally {
-
-        setLoading(false);
-      }
-    };
-
     fetchDashboard();
-
-  }, []);
+  }, [fetchDashboard, location.pathname]);
 
 
   if (loading) {
@@ -83,6 +86,41 @@ function ClientDashboard() {
             100
         )
       : 0;
+
+  const pendingProjects =
+    dashboardData.assignedProjects -
+    dashboardData.inProgressProjects -
+    dashboardData.completedProjects;
+
+  const pendingPercentage =
+    dashboardData.assignedProjects > 0
+      ? Math.round(
+          (pendingProjects /
+            dashboardData.assignedProjects) *
+            100
+        )
+      : 0;
+
+  const inProgressPercentage =
+    dashboardData.assignedProjects > 0
+      ? Math.round(
+          (dashboardData.inProgressProjects /
+            dashboardData.assignedProjects) *
+            100
+        )
+      : 0;
+
+  const chartStyle = {
+    background: `conic-gradient(
+      #f59e0b 0 ${pendingPercentage}%,
+      #3b82f6 ${pendingPercentage}% ${
+        pendingPercentage + inProgressPercentage
+      }%,
+      #14b8a6 ${
+        pendingPercentage + inProgressPercentage
+      }% 100%
+    )`,
+  };
 
 
   return (
@@ -224,6 +262,46 @@ function ClientDashboard() {
 
           <div className="panel-title">
             Notifications
+          </div>
+
+          <div className="project-chart-wrap">
+
+            <div
+              className="project-donut"
+              style={chartStyle}
+            >
+              <div className="project-donut-center">
+                <strong>{completedPercentage}%</strong>
+                <span>Complete</span>
+              </div>
+            </div>
+
+            <div className="chart-legend">
+              <div className="legend-item">
+                <span className="legend-dot pending-dot"></span>
+                <div>
+                  <strong>{pendingProjects}</strong>
+                  <p>Pending</p>
+                </div>
+              </div>
+
+              <div className="legend-item">
+                <span className="legend-dot progress-dot"></span>
+                <div>
+                  <strong>{dashboardData.inProgressProjects}</strong>
+                  <p>In Progress</p>
+                </div>
+              </div>
+
+              <div className="legend-item">
+                <span className="legend-dot completed-dot"></span>
+                <div>
+                  <strong>{dashboardData.completedProjects}</strong>
+                  <p>Completed</p>
+                </div>
+              </div>
+            </div>
+
           </div>
 
           <div className="notification-item">

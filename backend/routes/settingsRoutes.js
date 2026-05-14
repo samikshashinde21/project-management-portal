@@ -4,6 +4,7 @@ const router = express.Router();
 
 const {
   getSettings,
+  getPublicSettings,
   updateSettings,
   changePassword,
 } = require("../controllers/settingsController");
@@ -13,6 +14,8 @@ const {
   admin,
 } = require("../middleware/authMiddleware");
 
+
+router.get("/public", getPublicSettings);
 
 router.get("/", protect, admin, getSettings);
 

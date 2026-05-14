@@ -4,6 +4,15 @@ const User = require("../models/userModel");
 const Settings = require("../models/settingsModel");
 const generateToken = require("../utils/generateToken");
 
+const passwordRuleMessage =
+  "Password must be more than 6 characters and include one uppercase letter and one symbol";
+
+const isValidPassword = (password) =>
+  typeof password === "string" &&
+  password.length > 6 &&
+  /[A-Z]/.test(password) &&
+  /[^A-Za-z0-9]/.test(password);
+
 
 // @desc Register user
 // @route POST /api/users
@@ -13,13 +22,26 @@ const registerUser = async (req, res) => {
   try {
     const { name, email, password } = req.body;
 
+    if (!name || !email || !password) {
+      return res.status(400).json({
+        message: "Name, email and password are required",
+      });
+    }
+
+    if (!isValidPassword(password)) {
+      return res.status(400).json({
+        message: passwordRuleMessage,
+      });
+    }
+
     const settings = await Settings.findOne({
       key: "system",
     });
 
-    if (settings && !settings.allowRegistration) {
+    if (settings && settings.maintenanceMode) {
       return res.status(403).json({
-        message: "Registration is currently disabled",
+        message:
+          "Maintenance mode is on. New registrations are temporarily closed.",
       });
     }
 
@@ -47,6 +69,7 @@ const registerUser = async (req, res) => {
         name: user.name,
         email: user.email,
         role: user.role,
+        profileImage: user.profileImage,
         token: generateToken(user._id),
       });
     } else {
@@ -81,6 +104,7 @@ const loginUser = async (req, res) => {
         name: user.name,
         email: user.email,
         role: user.role,
+        profileImage: user.profileImage,
         token: generateToken(user._id),
       });
     } else {
@@ -110,7 +134,32 @@ const updateUserProfile = async (req, res) => {
 
       user.email = req.body.email || user.email;
 
+      user.profileImage =
+        req.body.profileImage ?? user.profileImage;
+
       if (req.body.password) {
+        if (!isValidPassword(req.body.password)) {
+          return res.status(400).json({
+            message: passwordRuleMessage,
+          });
+        }
+
+        if (!req.body.currentPassword) {
+          return res.status(400).json({
+            message: "Current password is required",
+          });
+        }
+
+        const passwordMatches = await bcrypt.compare(
+          req.body.currentPassword,
+          user.password
+        );
+
+        if (!passwordMatches) {
+          return res.status(401).json({
+            message: "Current password is incorrect",
+          });
+        }
 
         const salt = await bcrypt.genSalt(10);
 
@@ -127,6 +176,7 @@ const updateUserProfile = async (req, res) => {
         name: updatedUser.name,
         email: updatedUser.email,
         role: updatedUser.role,
+        profileImage: updatedUser.profileImage,
         token: generateToken(updatedUser._id),
       });
 
@@ -159,6 +209,18 @@ const createUserByAdmin = async (req, res) => {
       role,
     } = req.body;
 
+    if (!name || !email || !password) {
+      return res.status(400).json({
+        message: "Name, email and password are required",
+      });
+    }
+
+    if (!isValidPassword(password)) {
+      return res.status(400).json({
+        message: passwordRuleMessage,
+      });
+    }
+
     const userExists = await User.findOne({ email });
 
     if (userExists) {
@@ -186,6 +248,7 @@ const createUserByAdmin = async (req, res) => {
       name: user.name,
       email: user.email,
       role: user.role,
+      profileImage: user.profileImage,
     });
 
   } catch (error) {
@@ -213,6 +276,12 @@ const updateUserByAdmin = async (req, res) => {
     user.role = req.body.role || user.role;
 
     if (req.body.password) {
+      if (!isValidPassword(req.body.password)) {
+        return res.status(400).json({
+          message: passwordRuleMessage,
+        });
+      }
+
       const salt = await bcrypt.genSalt(10);
 
       user.password = await bcrypt.hash(
@@ -228,6 +297,7 @@ const updateUserByAdmin = async (req, res) => {
       name: updatedUser.name,
       email: updatedUser.email,
       role: updatedUser.role,
+      profileImage: updatedUser.profileImage,
     });
 
   } catch (error) {
@@ -250,6 +320,7 @@ const updateUserRole = async (req, res) => {
       name: updatedUser.name,
       email: updatedUser.email,
       role: updatedUser.role,
+      profileImage: updatedUser.profileImage,
     });
   } else {
     res.status(404).json({

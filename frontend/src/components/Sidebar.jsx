@@ -157,7 +157,14 @@ function Sidebar() {
   <div className="user-box">
 
     <div className="user-avatar">
-      {userInfo?.name?.charAt(0)}
+      {userInfo?.profileImage ? (
+        <img
+          src={userInfo.profileImage}
+          alt={userInfo?.name}
+        />
+      ) : (
+        userInfo?.name?.charAt(0)
+      )}
     </div>
 
     <div className="user-name">

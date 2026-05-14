@@ -9,22 +9,11 @@ const settingsSchema = mongoose.Schema(
       default: "system",
     },
 
-    systemName: {
-      type: String,
-      required: true,
-      default: "Project Management Website",
-    },
-
-    allowRegistration: {
+    maintenanceMode: {
       type: Boolean,
-      default: true,
+      default: false,
     },
 
-    defaultProjectStatus: {
-      type: String,
-      enum: ["pending", "in-progress", "completed"],
-      default: "pending",
-    },
   },
   {
     timestamps: true,

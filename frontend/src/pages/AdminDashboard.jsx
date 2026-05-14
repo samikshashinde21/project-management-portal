@@ -71,6 +71,36 @@ function AdminDashboard() {
         )
       : 0;
 
+  const pendingPercentage =
+    dashboardData.totalProjects > 0
+      ? Math.round(
+          (dashboardData.pendingProjects /
+            dashboardData.totalProjects) *
+            100
+        )
+      : 0;
+
+  const inProgressPercentage =
+    dashboardData.totalProjects > 0
+      ? Math.round(
+          (dashboardData.inProgressProjects /
+            dashboardData.totalProjects) *
+            100
+        )
+      : 0;
+
+  const chartStyle = {
+    background: `conic-gradient(
+      #f59e0b 0 ${pendingPercentage}%,
+      #3b82f6 ${pendingPercentage}% ${
+        pendingPercentage + inProgressPercentage
+      }%,
+      #14b8a6 ${
+        pendingPercentage + inProgressPercentage
+      }% 100%
+    )`,
+  };
+
 
   return (
     <DashboardLayout>
@@ -216,6 +246,48 @@ function AdminDashboard() {
 
           <div className="panel-title">
             Project Overview
+          </div>
+
+          <div className="project-chart-wrap">
+
+            <div
+              className="project-donut"
+              style={chartStyle}
+            >
+              <div className="project-donut-center">
+                <strong>{completedPercentage}%</strong>
+                <span>Complete</span>
+              </div>
+            </div>
+
+            <div className="chart-legend">
+
+              <div className="legend-item">
+                <span className="legend-dot pending-dot"></span>
+                <div>
+                  <strong>{dashboardData.pendingProjects}</strong>
+                  <p>Pending</p>
+                </div>
+              </div>
+
+              <div className="legend-item">
+                <span className="legend-dot progress-dot"></span>
+                <div>
+                  <strong>{dashboardData.inProgressProjects}</strong>
+                  <p>In Progress</p>
+                </div>
+              </div>
+
+              <div className="legend-item">
+                <span className="legend-dot completed-dot"></span>
+                <div>
+                  <strong>{dashboardData.completedProjects}</strong>
+                  <p>Completed</p>
+                </div>
+              </div>
+
+            </div>
+
           </div>
 
           <div className="progress-item">

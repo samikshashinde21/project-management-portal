@@ -1,5 +1,4 @@
 const Project = require("../models/projectModel");
-const Settings = require("../models/settingsModel");
 
 
 // @desc Create project
@@ -17,10 +16,6 @@ const createProject = async (req, res) => {
       status,
     } = req.body;
 
-    const settings = await Settings.findOne({
-      key: "system",
-    });
-
     const project = await Project.create({
       title,
       description,
@@ -28,9 +23,7 @@ const createProject = async (req, res) => {
       assignedDate,
       deadline,
       status:
-        status ||
-        settings?.defaultProjectStatus ||
-        "pending",
+        status || "pending",
       createdBy: req.user._id,
     });
 
@@ -80,7 +73,7 @@ const getProjects = async (req, res) => {
 
 // @desc Update project
 // @route PUT /api/projects/:id
-// @access Admin
+// @access Admin / Assigned Client
 
 const updateProject = async (req, res) => {
   try {
@@ -93,21 +86,38 @@ const updateProject = async (req, res) => {
       });
     }
 
-    project.title = req.body.title || project.title;
+    if (req.user.role === "client") {
+      if (
+        project.assignedClient.toString() !==
+        req.user._id.toString()
+      ) {
+        return res.status(401).json({
+          message: "Not authorized",
+        });
+      }
 
-    project.description =
-      req.body.description || project.description;
+      project.status = req.body.status || project.status;
+    } else if (req.user.role === "admin") {
+      project.title = req.body.title || project.title;
 
-    project.assignedClient =
-      req.body.assignedClient || project.assignedClient;
+      project.description =
+        req.body.description || project.description;
 
-    project.assignedDate =
-      req.body.assignedDate || project.assignedDate;
+      project.assignedClient =
+        req.body.assignedClient || project.assignedClient;
 
-    project.deadline =
-      req.body.deadline || project.deadline;
+      project.assignedDate =
+        req.body.assignedDate || project.assignedDate;
 
-    project.status = req.body.status || project.status;
+      project.deadline =
+        req.body.deadline || project.deadline;
+
+      project.status = req.body.status || project.status;
+    } else {
+      return res.status(401).json({
+        message: "Not authorized",
+      });
+    }
 
     const updatedProject = await project.save();
 

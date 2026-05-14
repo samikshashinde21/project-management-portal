@@ -4,6 +4,14 @@ import DashboardLayout from "../layouts/DashboardLayout";
 
 import API from "../services/api";
 
+const passwordRuleMessage =
+  "Password must be more than 6 characters and include one uppercase letter and one symbol.";
+
+const isValidPassword = (password) =>
+  password.length > 6 &&
+  /[A-Z]/.test(password) &&
+  /[^A-Za-z0-9]/.test(password);
+
 
 const emptyClientForm = {
   name: "",
@@ -125,6 +133,14 @@ function ClientManagement() {
       (!editingClient && !formData.password.trim())
     ) {
       setFormError("Please fill all required fields.");
+      return;
+    }
+
+    if (
+      formData.password.trim() &&
+      !isValidPassword(formData.password)
+    ) {
+      setFormError(passwordRuleMessage);
       return;
     }
 
@@ -307,6 +323,7 @@ function ClientManagement() {
                   id="password"
                   name="password"
                   type="password"
+                  required={!editingClient}
                   value={formData.password}
                   onChange={inputChangeHandler}
                   placeholder={
@@ -315,6 +332,10 @@ function ClientManagement() {
                       : "Enter password"
                   }
                 />
+                <p className="password-hint">
+                  More than 6 characters, one uppercase
+                  letter, and one symbol.
+                </p>
               </div>
 
               {editingClient && (

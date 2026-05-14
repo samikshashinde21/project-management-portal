@@ -4,14 +4,30 @@ import DashboardLayout from "../layouts/DashboardLayout";
 
 import API from "../services/api";
 
+const passwordRuleMessage =
+  "Password must be more than 6 characters and include one uppercase letter and one symbol.";
+
+const isValidPassword = (password) =>
+  password.length > 6 &&
+  /[A-Z]/.test(password) &&
+  /[^A-Za-z0-9]/.test(password);
+
 
 function SettingsPage() {
 
+  const userInfo = JSON.parse(
+    localStorage.getItem("userInfo")
+  );
+
   const [settings, setSettings] =
     useState({
-      systemName: "",
-      allowRegistration: true,
-      defaultProjectStatus: "pending",
+      maintenanceMode: false,
+    });
+
+  const [profileForm, setProfileForm] =
+    useState({
+      name: userInfo?.name || "",
+      email: userInfo?.email || "",
     });
 
   const [passwordForm, setPasswordForm] =
@@ -29,10 +45,6 @@ function SettingsPage() {
 
   const [error, setError] =
     useState("");
-
-  const userInfo = JSON.parse(
-    localStorage.getItem("userInfo")
-  );
 
   const config = {
     headers: {
@@ -59,11 +71,8 @@ function SettingsPage() {
       );
 
       setSettings({
-        systemName: data.systemName || "",
-        allowRegistration:
-          data.allowRegistration ?? true,
-        defaultProjectStatus:
-          data.defaultProjectStatus || "pending",
+        maintenanceMode:
+          data.maintenanceMode ?? false,
       });
 
     } catch (error) {
@@ -118,10 +127,7 @@ function SettingsPage() {
       );
 
       setSettings({
-        systemName: data.systemName,
-        allowRegistration: data.allowRegistration,
-        defaultProjectStatus:
-          data.defaultProjectStatus,
+        maintenanceMode: data.maintenanceMode,
       });
 
       showToast("Settings saved successfully.");
@@ -135,6 +141,47 @@ function SettingsPage() {
   };
 
 
+  const profileChangeHandler = (e) => {
+    setProfileForm({
+      ...profileForm,
+      [e.target.name]: e.target.value,
+    });
+  };
+
+
+  const saveProfileHandler = async (e) => {
+    e.preventDefault();
+
+    try {
+      setError("");
+
+      const { data } = await API.put(
+        "/users/profile",
+        profileForm,
+        config
+      );
+
+      localStorage.setItem(
+        "userInfo",
+        JSON.stringify(data)
+      );
+
+      setProfileForm({
+        name: data.name,
+        email: data.email,
+      });
+
+      showToast("Admin profile updated.");
+
+    } catch (error) {
+      setError(
+        error.response?.data?.message ||
+          "Profile could not be updated."
+      );
+    }
+  };
+
+
   const changePasswordHandler = async (e) => {
     e.preventDefault();
 
@@ -143,6 +190,11 @@ function SettingsPage() {
       passwordForm.confirmPassword
     ) {
       setError("New password and confirmation do not match.");
+      return;
+    }
+
+    if (!isValidPassword(passwordForm.newPassword)) {
+      setError(passwordRuleMessage);
       return;
     }
 
@@ -205,8 +257,8 @@ function SettingsPage() {
           <h1>Settings</h1>
 
           <p>
-            Control registration, default project status,
-            and update your admin password.
+            Update admin account details, password, and
+            maintenance rules.
           </p>
         </div>
       </div>
@@ -223,6 +275,53 @@ function SettingsPage() {
 
         <div className="panel">
           <div className="panel-title">
+            Admin Account
+          </div>
+
+          <form
+            className="project-form"
+            onSubmit={saveProfileHandler}
+          >
+            <div className="form-group">
+              <label htmlFor="name">
+                Admin Name
+              </label>
+
+              <input
+                id="name"
+                name="name"
+                value={profileForm.name}
+                onChange={profileChangeHandler}
+              />
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="email">
+                Admin Email
+              </label>
+
+              <input
+                id="email"
+                name="email"
+                type="email"
+                value={profileForm.email}
+                onChange={profileChangeHandler}
+              />
+            </div>
+
+            <div className="modal-actions">
+              <button
+                type="submit"
+                className="primary-btn"
+              >
+                Save Account
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <div className="panel">
+          <div className="panel-title">
             System Rules
           </div>
 
@@ -230,55 +329,25 @@ function SettingsPage() {
             className="project-form"
             onSubmit={saveSettingsHandler}
           >
-            <div className="form-group">
-              <label htmlFor="systemName">
-                System Name
-              </label>
-
-              <input
-                id="systemName"
-                name="systemName"
-                value={settings.systemName}
-                onChange={settingsChangeHandler}
-              />
-            </div>
-
-            <div className="form-group">
-              <label htmlFor="defaultProjectStatus">
-                Default Project Status
-              </label>
-
-              <select
-                id="defaultProjectStatus"
-                name="defaultProjectStatus"
-                value={settings.defaultProjectStatus}
-                onChange={settingsChangeHandler}
-              >
-                <option value="pending">
-                  Pending
-                </option>
-
-                <option value="in-progress">
-                  In Progress
-                </option>
-
-                <option value="completed">
-                  Completed
-                </option>
-              </select>
-            </div>
-
             <label className="settings-toggle">
               <input
                 type="checkbox"
-                name="allowRegistration"
-                checked={settings.allowRegistration}
+                name="maintenanceMode"
+                checked={settings.maintenanceMode}
                 onChange={settingsChangeHandler}
               />
               <span>
-                Allow public user registration
+                Maintenance mode
               </span>
             </label>
+
+            {settings.maintenanceMode && (
+              <div className="maintenance-note">
+                Maintenance is on. New public
+                registrations will show a maintenance
+                message and will not be created.
+              </div>
+            )}
 
             <div className="modal-actions">
               <button
@@ -310,6 +379,7 @@ function SettingsPage() {
                 id="currentPassword"
                 name="currentPassword"
                 type="password"
+                required
                 value={passwordForm.currentPassword}
                 onChange={passwordChangeHandler}
               />
@@ -324,6 +394,7 @@ function SettingsPage() {
                 id="newPassword"
                 name="newPassword"
                 type="password"
+                required
                 value={passwordForm.newPassword}
                 onChange={passwordChangeHandler}
               />
@@ -338,9 +409,15 @@ function SettingsPage() {
                 id="confirmPassword"
                 name="confirmPassword"
                 type="password"
+                required
                 value={passwordForm.confirmPassword}
                 onChange={passwordChangeHandler}
               />
+
+              <p className="password-hint">
+                More than 6 characters, one uppercase
+                letter, and one symbol.
+              </p>
             </div>
 
             <div className="modal-actions">

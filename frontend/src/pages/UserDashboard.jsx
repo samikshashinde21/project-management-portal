@@ -1,27 +1,46 @@
 import DashboardLayout from "../layouts/DashboardLayout";
 
+
 function UserDashboard() {
 
   const userInfo = JSON.parse(
     localStorage.getItem("userInfo")
   );
 
+  const profileItems = [
+    userInfo?.name,
+    userInfo?.email,
+    userInfo?.profileImage,
+  ];
+
+  const completedItems = profileItems.filter(Boolean).length;
+
+  const profileCompletion = Math.round(
+    (completedItems / profileItems.length) * 100
+  );
+
 
   return (
     <DashboardLayout>
 
-      <div className="topbar">
+      <div className="client-summary-band">
 
         <div>
 
-          <h1 className="page-title">
-            Welcome, {userInfo?.name}
-          </h1>
+          <div className="summary-kicker">
+            User Portal
+          </div>
 
-          <p className="table-subtitle">
-            Overview of your workspace
-          </p>
+          <h2>
+            Welcome, {userInfo?.name}. View your account
+            summary and manage your personal information.
+          </h2>
 
+        </div>
+
+        <div className="summary-score">
+          <span>{profileCompletion}%</span>
+          <p>profile</p>
         </div>
 
       </div>
@@ -29,29 +48,34 @@ function UserDashboard() {
 
       <div className="dashboard-cards">
 
-        <div className="stat-card">
-
+        <div className="stat-card accent-teal">
           <div className="stat-title">
-            Your Role
+            Account Role
           </div>
 
-          <div className="stat-value">
+          <div className="stat-value user-stat-text">
             User
           </div>
-
         </div>
 
-
-        <div className="stat-card">
-
+        <div className="stat-card accent-blue">
           <div className="stat-title">
             Account Status
           </div>
 
-          <div className="stat-value">
+          <div className="stat-value user-stat-text">
             Active
           </div>
+        </div>
 
+        <div className="stat-card accent-gold">
+          <div className="stat-title">
+            Profile Completion
+          </div>
+
+          <div className="stat-value">
+            {profileCompletion}%
+          </div>
         </div>
 
       </div>
@@ -60,59 +84,62 @@ function UserDashboard() {
       <div className="content-grid">
 
         <div className="panel">
-
           <div className="panel-title">
-            Notifications
+            Personal Summary
           </div>
 
-          <div className="task-item">
-            <span>
-              Welcome to the portal
-            </span>
+          <div className="user-summary-list">
+            <div>
+              <span>Name</span>
+              <strong>{userInfo?.name}</strong>
+            </div>
 
-            <span className="task-tag">
-              New
-            </span>
+            <div>
+              <span>Email</span>
+              <strong>{userInfo?.email}</strong>
+            </div>
+
+            <div>
+              <span>Access Level</span>
+              <strong>{userInfo?.role}</strong>
+            </div>
           </div>
-
-          <div className="task-item">
-            <span>
-              Your account is active
-            </span>
-
-            <span className="task-tag">
-              System
-            </span>
-          </div>
-
         </div>
 
 
         <div className="panel">
-
           <div className="panel-title">
             Quick Info
           </div>
 
-          <div className="progress-item">
+          <div className="notification-item">
+            <div className="notification-dot"></div>
 
+            <div>
+              <strong>Limited dashboard access</strong>
+
+              <p>
+                Users can view summary data and update
+                their own profile details.
+              </p>
+            </div>
+          </div>
+
+          <div className="progress-item">
             <div className="progress-header">
               <span>Profile Completion</span>
-
-              <span>80%</span>
+              <span>{profileCompletion}%</span>
             </div>
 
             <div className="progress-bar-bg">
-
               <div
                 className="progress-bar-fill"
-                style={{ width: "80%" }}
+                style={{
+                  width: `${profileCompletion}%`,
+                }}
               ></div>
-
             </div>
-
           </div>
-
         </div>
 
       </div>

@@ -4,6 +4,15 @@ const Settings = require("../models/settingsModel");
 const User = require("../models/userModel");
 const generateToken = require("../utils/generateToken");
 
+const passwordRuleMessage =
+  "Password must be more than 6 characters and include one uppercase letter and one symbol";
+
+const isValidPassword = (password) =>
+  typeof password === "string" &&
+  password.length > 6 &&
+  /[A-Z]/.test(password) &&
+  /[^A-Za-z0-9]/.test(password);
+
 
 const getSettingsDocument = async () => {
   let settings = await Settings.findOne({
@@ -38,6 +47,26 @@ const getSettings = async (req, res) => {
 };
 
 
+// @desc Get public maintenance status
+// @route GET /api/settings/public
+// @access Public
+
+const getPublicSettings = async (req, res) => {
+  try {
+    const settings = await getSettingsDocument();
+
+    res.json({
+      maintenanceMode: settings.maintenanceMode,
+    });
+
+  } catch (error) {
+    res.status(500).json({
+      message: error.message,
+    });
+  }
+};
+
+
 // @desc Update system settings
 // @route PUT /api/settings
 // @access Admin
@@ -46,16 +75,9 @@ const updateSettings = async (req, res) => {
   try {
     const settings = await getSettingsDocument();
 
-    settings.systemName =
-      req.body.systemName || settings.systemName;
-
-    if (typeof req.body.allowRegistration === "boolean") {
-      settings.allowRegistration = req.body.allowRegistration;
+    if (typeof req.body.maintenanceMode === "boolean") {
+      settings.maintenanceMode = req.body.maintenanceMode;
     }
-
-    settings.defaultProjectStatus =
-      req.body.defaultProjectStatus ||
-      settings.defaultProjectStatus;
 
     const updatedSettings = await settings.save();
 
@@ -83,6 +105,12 @@ const changePassword = async (req, res) => {
     if (!currentPassword || !newPassword) {
       return res.status(400).json({
         message: "Current password and new password are required",
+      });
+    }
+
+    if (!isValidPassword(newPassword)) {
+      return res.status(400).json({
+        message: passwordRuleMessage,
       });
     }
 
@@ -131,6 +159,7 @@ const changePassword = async (req, res) => {
 
 module.exports = {
   getSettings,
+  getPublicSettings,
   updateSettings,
   changePassword,
 };

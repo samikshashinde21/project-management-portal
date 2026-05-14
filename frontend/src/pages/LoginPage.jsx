@@ -112,6 +112,7 @@ useEffect(() => {
             <input
               type="email"
               placeholder="Enter email"
+              required
               value={email}
               onChange={(e) =>
                 setEmail(e.target.value)
@@ -128,6 +129,7 @@ useEffect(() => {
             <input
               type="password"
               placeholder="Enter password"
+              required
               value={password}
               onChange={(e) =>
                 setPassword(e.target.value)
